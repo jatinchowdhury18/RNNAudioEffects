@@ -1,0 +1,6 @@
+# datasets
+Data/*
+!Data/README.md
+
+# vs code settings
+.vscode/
