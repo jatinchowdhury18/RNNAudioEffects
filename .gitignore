@@ -2,5 +2,8 @@
 Data/*
 !Data/README.md
 
+# Python artifacts
+__pycache__/
+
 # vs code settings
 .vscode/

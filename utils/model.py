@@ -2,6 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
+import time
+import json
+from json import JSONEncoder
+
+class NumpyArrayEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return JSONEncoder.default(self, obj)
 
 class Model():
     def __init__(self, loss_func, optimizer=keras.optimizers.Adam()):
@@ -17,6 +26,7 @@ class Model():
     def train(self, num_epochs, in_train, out_train, in_val=None, out_val=None, N_skip=1000, N_block=2048):
         N_samples = in_train.shape[1]
         for epoch in range(num_epochs):
+            start = time.perf_counter()
             epoch_loss_avg = keras.metrics.Mean()
             epoch_error = keras.metrics.MeanSquaredError()
             val_loss_avg = keras.metrics.Mean()
@@ -54,8 +64,10 @@ class Model():
             self.train_err.append(epoch_error.result())
             self.val_loss.append(val_loss_avg.result())
             self.val_err.append(val_error.result())
-            print("Epoch {:03d}: Loss: {:.3f}, Error: {:.3%}, Val_Loss: {:.3f}, Val_Error: {:.3%}".format(
-                epoch+1, epoch_loss_avg.result(), epoch_error.result(), val_loss_avg.result(), val_error.result()))
+            dur = time.perf_counter() - start
+
+            print("Epoch {:03d} - Time: {:.4f}s, Loss: {:.4f}, Error: {:.3%}, Val_Loss: {:.4f}, Val_Error: {:.3%}".format(
+                epoch+1, dur, epoch_loss_avg.result(), epoch_error.result(), val_loss_avg.result(), val_error.result()))
         
         print("DONE!")
 
@@ -77,3 +89,78 @@ class Model():
         plt.xlabel('Epochs')
         plt.ylabel('Error')
         plt.legend()
+
+    def save_model_json(self):
+        def get_layer_type(layer):
+            if isinstance(layer, keras.layers.TimeDistributed):
+                return 'time-distributed-dense'
+
+            if isinstance(layer, keras.layers.GRU):
+                return 'gru'
+
+            if isinstance(layer, keras.layers.Dense):
+                return 'dense'
+
+            return 'unknown'
+
+        def save_layer(layer):
+            layer_dict = {
+                "type"    : get_layer_type(layer),
+                "shape"   : layer.output_shape,
+                "weights" : layer.get_weights()
+            }
+
+            return layer_dict
+
+
+        model_dict = {}
+        model_dict["in_shape"] = self.model.input_shape
+        layers = []
+        for layer in self.model.layers:
+            layer_dict = save_layer(layer)
+            layers.append(layer_dict)
+
+        model_dict["layers"] = layers
+        return model_dict
+
+    def save_model(self, filename):
+        model_dict = self.save_model_json()
+        with open(filename, 'w') as outfile:
+            json.dump(model_dict, outfile, cls=NumpyArrayEncoder)
+
+    def load_model_json(self, json):
+        in_shape = json["in_shape"][1:]
+        self.model.add(keras.layers.InputLayer(input_shape=in_shape))
+
+        for layer in json["layers"]:
+            weights = layer["weights"]
+            np_weights = []
+            for w in weights:
+                np_weights.append(np.array(w))
+
+            if layer["type"] == 'time-distributed-dense':
+                d_layer = keras.layers.Dense(layer["shape"][-1])
+                d_layer.build(input_shape=in_shape)
+                d_layer.set_weights(np_weights)
+                m_layer = keras.layers.TimeDistributed(d_layer)
+
+            elif layer["type"] == 'gru':
+                m_layer = keras.layers.GRU(units=layer["shape"][-1], return_sequences=True)
+                m_layer.build(input_shape=in_shape)
+                m_layer.set_weights(np_weights)
+
+            elif layer["type"] == 'dense':
+                m_layer = keras.layers.Dense(layer["shape"][-1])
+                m_layer.build(input_shape=in_shape)
+                m_layer.set_weights(np_weights)
+
+            else:
+                continue
+            
+            in_shape = tuple(layer["shape"])
+            self.model.add(m_layer)
+    
+    def load_model(self, filename):
+        with open(filename, 'r') as json_file:
+            model_json = json.load(json_file)
+        self.load_model_json(model_json)
