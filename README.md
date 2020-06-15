@@ -5,6 +5,7 @@ Experimental audio effects made with recurrent neural networks.
 Goals:
 - [ ] Hysteresis with 3 parameters
 - [ ] Hysteresis with arbitrary sample rate (look at aliasing)
+- [ ] Figure out how to adjust weights for any sample rate
 - [ ] Time-varying effect (phaser?)
 - [ ] Reverse Distortion (with params??)
 - [ ] Restoration (high freq. loss, deadzone)
@@ -13,7 +14,10 @@ Goals:
 
 ## Hysteresis (params)
 
-- Try with simple gain param, nothing else
+- Train full model with sample rate
+- Train full model with 3-params
+- Train model with sample rate and 3-params
+- Implement C++ hysteresi model plugin
 
 ## Reverse Distortion
 
@@ -28,10 +32,8 @@ Goals:
   - Try different net architectures
   - Try single degradation method at a time
 
-## Phaser
+## Time-varying
 
-- FB section not working very well
-  - Try different architectures
-  - Try different ways of inputing sine wave
-  - Evetntually add FB param
-- Try with mod section
+- success with vibrato
+- Try with phaser mod section
+- Try with phaser FB section

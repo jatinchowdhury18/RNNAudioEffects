@@ -23,51 +23,67 @@ class Model():
         self.val_loss = []
         self.val_err = []
 
-    def train(self, num_epochs, in_train, out_train, in_val=None, out_val=None, N_skip=1000, N_block=2048):
+    def run_training(self, in_train, out_train, epoch_loss, epoch_error, N_skip, N_block):
         N_samples = in_train.shape[1]
-        for epoch in range(num_epochs):
-            start = time.perf_counter()
-            epoch_loss_avg = keras.metrics.Mean()
-            epoch_error = keras.metrics.MeanSquaredError()
-            val_loss_avg = keras.metrics.Mean()
-            val_error = keras.metrics.MeanSquaredError()
+        self.model.reset_states() # clear existing state
+        self.model(in_train[:, :N_skip, :]) # process some samples to build up state
 
-            # run training
-            self.model.reset_states() # clear existing state
-            self.model(in_train[:, :N_skip, :]) # process some samples to build up state
+        # iterate over blocks
+        for n in range(N_skip, N_samples-N_block, N_block):
+            # compute loss
+            with tf.GradientTape() as tape:
+                y_pred = self.model(in_train[:, n:n+N_block, :])
+                loss = self.loss_func(out_train[:, n:n+N_block, :], y_pred)
 
-            # iterate over blocks
-            for n in range(N_skip, N_samples-N_block, N_block):
-                # compute loss
-                with tf.GradientTape() as tape:
-                    y_pred = self.model(in_train[:, n:n+N_block, :])
-                    loss = self.loss_func(out_train[:, n:n+N_block, :], y_pred)
+            # apply gradients
+            grads = tape.gradient(loss, self.model.trainable_variables)
+            self.opt.apply_gradients(zip(grads, self.model.trainable_variables))
 
-                # apply gradients
-                grads = tape.gradient(loss, self.model.trainable_variables)
-                self.opt.apply_gradients(zip(grads, self.model.trainable_variables))
+            # update training metrics
+            epoch_loss.update_state(loss)
+            epoch_error.update_state(out_train[:, n:n+N_block, :], y_pred)
 
-                # update training metrics
-                epoch_loss_avg.update_state(loss)
-                epoch_error.update_state(out_train[:, n:n+N_block, :], y_pred)
+    def run_validation(self, in_val, out_val, val_loss, val_error):
+        self.model.reset_states()
+        y_val = self.model(in_val)
+        loss = self.loss_func(out_val, y_val)
+        val_loss.update_state(loss)
+        val_error.update_state(out_val, y_val)
 
-            # run validation
-            if in_val is not None:
-                self.model.reset_states()
-                y_val = self.model(in_val)
-                loss = self.loss_func(out_val, y_val)
-                val_loss_avg.update_state(loss)
-                val_error.update_state(out_val, y_val)
+    def run_epoch(self, epoch, in_train, out_train, in_val=None, out_val=None, N_skip=1000, N_block=2048):
+        start = time.perf_counter()
+        epoch_loss_avg = keras.metrics.Mean()
+        epoch_error = keras.metrics.MeanSquaredError()
+        val_loss_avg = keras.metrics.Mean()
+        val_error = keras.metrics.MeanSquaredError()
+
+        self.run_training(in_train, out_train, epoch_loss_avg, epoch_error, N_skip, N_block)
+        if in_val is not None:
+            self.run_validation(in_val, out_val, val_loss_avg, val_error)
             
-            # end epoch
-            self.train_loss.append(epoch_loss_avg.result())
-            self.train_err.append(epoch_error.result())
-            self.val_loss.append(val_loss_avg.result())
-            self.val_err.append(val_error.result())
-            dur = time.perf_counter() - start
+        # end epoch
+        self.train_loss.append(epoch_loss_avg.result())
+        self.train_err.append(epoch_error.result())
+        self.val_loss.append(val_loss_avg.result())
+        self.val_err.append(val_error.result())
+        dur = time.perf_counter() - start
 
-            print("Epoch {:03d} - Time: {:.4f}s, Loss: {:.4f}, Error: {:.3%}, Val_Loss: {:.4f}, Val_Error: {:.3%}".format(
-                epoch+1, dur, epoch_loss_avg.result(), epoch_error.result(), val_loss_avg.result(), val_error.result()))
+        print("Epoch {:03d} - Time: {:.4f}s, Loss: {:.4f}, Error: {:.3%}, Val_Loss: {:.4f}, Val_Error: {:.3%}".format(
+            epoch+1, dur, epoch_loss_avg.result(), epoch_error.result(), val_loss_avg.result(), val_error.result()))
+
+    def train_until(self, loss_stop, in_train, out_train, in_val=None, out_val=None, N_skip=1000, N_block=2048):
+        epoch = 0
+        while True:
+            self.run_epoch(epoch, in_train, out_train, in_val, out_val, N_skip, N_block)
+
+            if self.train_loss[-1] < loss_stop:
+                break
+
+            epoch += 1
+
+    def train(self, num_epochs, in_train, out_train, in_val=None, out_val=None, N_skip=1000, N_block=2048):
+        for epoch in range(num_epochs):
+            self.run_epoch(epoch, in_train, out_train, in_val, out_val, N_skip, N_block)
         
         print("DONE!")
 
@@ -164,3 +180,7 @@ class Model():
         with open(filename, 'r') as json_file:
             model_json = json.load(json_file)
         self.load_model_json(model_json)
+
+    def save_history(self, filename):
+        history = np.array([self.train_loss, self.train_err, self.val_loss, self.val_err])
+        np.savetxt(filename, history)
