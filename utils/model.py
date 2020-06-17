@@ -155,7 +155,7 @@ class Model():
                 np_weights.append(np.array(w))
 
             if layer["type"] == 'time-distributed-dense':
-                d_layer = keras.layers.Dense(layer["shape"][-1])
+                d_layer = keras.layers.Dense(layer["shape"][-1], activation='tanh')
                 d_layer.build(input_shape=in_shape)
                 d_layer.set_weights(np_weights)
                 m_layer = keras.layers.TimeDistributed(d_layer)
@@ -184,3 +184,10 @@ class Model():
     def save_history(self, filename):
         history = np.array([self.train_loss, self.train_err, self.val_loss, self.val_err])
         np.savetxt(filename, history)
+
+    def load_history(self, filename):
+        history = np.loadtxt(filename)
+        self.train_loss = history[0].tolist()
+        self.train_err = history[1].tolist()
+        self.val_loss = history[2].tolist()
+        self.val_err = history[3].tolist()

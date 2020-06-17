@@ -1,12 +1,13 @@
 # %%
 # Load dependencies
+import tensorflow as tf
+from tensorflow import keras
+import librosa
+
 import numpy as np
 import matplotlib.pyplot as plt
 import audio_dspy as adsp
 import scipy.signal as signal
-import tensorflow as tf
-from tensorflow import keras
-import librosa
 from tqdm import tqdm
 import os
 import random
@@ -22,7 +23,7 @@ import utils.losses as losses
 filepath = '../Data/fma_small/'
 files = os.listdir(filepath)
 
-NUM_FILES = 400
+NUM_FILES = 500
 NUM_SAMPLES = 20000
 FS = 96000
 clean_data = []
@@ -31,7 +32,7 @@ for i in tqdm(range(NUM_FILES)):
     clean_data.append(x)
 
 clean_data = np.asarray(clean_data)
-print(np.shape(clean_data))
+# print(np.shape(clean_data))
 
 # %%
 # look at file
@@ -71,10 +72,10 @@ plt.semilogx(freqs, x_fft)
 plt.semilogx(freqs, y_fft)
 
 # %%
-NUM_TRAIN = 380
-NUM_VAL = 20
+NUM_TRAIN = 475
+NUM_VAL = 25
 x_data = np.stack((clean_data, drive_data, sat_data, width_data), axis=1)
-print(x_data.shape)
+# print(x_data.shape)
 
 x_train, x_val = np.split(x_data, [NUM_TRAIN])
 y_train, y_val  = np.split(hyst_data,  [NUM_TRAIN])
@@ -85,7 +86,7 @@ OUT_val    = np.reshape(y_val, (NUM_VAL, NUM_SAMPLES, 1))
 IN_train = np.reshape(x_train.transpose((0, 2, 1)), (NUM_TRAIN, NUM_SAMPLES, 4))
 IN_val   = np.reshape(x_val.transpose((0, 2, 1)), (NUM_VAL, NUM_SAMPLES, 4))
 
-print(np.shape(IN_train))
+# print(np.shape(IN_train))
 
 # %%
 plt.plot(IN_train[0, :, 0])
@@ -100,15 +101,20 @@ def model_loss(target_y, predicted_y):
 
 # construct model
 model = Model(model_loss, optimizer=keras.optimizers.Adam(learning_rate=5.0e-4))
-model.model.add(keras.layers.InputLayer(input_shape=(None, 4)))
-model.model.add(keras.layers.TimeDistributed(keras.layers.Dense(8, activation='tanh')))
-model.model.add(keras.layers.GRU(units=16, return_sequences=True))
-model.model.add(keras.layers.Dense(1))
+# model.model.add(keras.layers.InputLayer(input_shape=(None, 4)))
+# model.model.add(keras.layers.TimeDistributed(keras.layers.Dense(8, activation='tanh')))
+# model.model.add(keras.layers.GRU(units=16, return_sequences=True))
+# model.model.add(keras.layers.Dense(1))
+model.load_model('models/hysteresis_three.json')
 
 model.model.summary()
 
 # %%
-model.train(400, IN_train, OUT_train, IN_val, OUT_val)
+model.load_history('models/hysteresis_three_history.txt')
+
+# %%
+model.train(200, IN_train, OUT_train, IN_val, OUT_val)
+# model.train_until(0.01, IN_train, OUT_train, IN_val, OUT_val)
 
 # %%
 # plot metrics
@@ -120,7 +126,7 @@ model.plot_error()
 
 # %%
 # Test prediction
-idx = 100
+idx = 102
 print(np.shape(x_data[idx]))
 
 predictions = model.model.predict(IN_train[idx].reshape(1, NUM_SAMPLES, 4)).flatten()
@@ -151,9 +157,12 @@ plt.xlabel('Frequency [Hz]')
 plt.ylabel('Magnitude [dB]')
 
 # %%
-idx = 100
 out_data = model.model.predict(IN_train[idx].reshape(1, NUM_SAMPLES, 4)).flatten()
 plt.plot(clean_data[idx], hyst_data[idx])
-plt.plot(clean_data[idx], out_data)
+plt.plot(clean_data[idx], out_data, '--')
+
+# %%
+model.save_model('models/hysteresis_three.json')
+model.save_history('models/hysteresis_three_history.txt')
 
 # %%
