@@ -7,3 +7,6 @@ __pycache__/
 
 # vs code settings
 .vscode/
+
+# Plugin artifacts
+build/
