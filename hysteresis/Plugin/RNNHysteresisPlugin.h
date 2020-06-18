@@ -16,8 +16,14 @@ public:
     void processBlock (AudioBuffer<float>& buffer) override;
 
 private:
+    std::atomic<float>* driveParam;
+    std::atomic<float>* satParam;
+    std::atomic<float>* widthParam;
+
     std::unique_ptr<Model<float>> rnn;
     float T = 1.0f / 44100.0f;
+
+    AudioBuffer<float> monoBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RNNHysteresis)
 };

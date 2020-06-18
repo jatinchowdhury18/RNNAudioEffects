@@ -1,6 +1,8 @@
 #ifndef LAYER_H_INCLUDED
 #define LAYER_H_INCLUDED
 
+#define USE_EIGEN
+
 template<typename T>
 class Layer
 {
@@ -9,6 +11,8 @@ public:
         in_size (in_size),
         out_size (out_size)
     {}
+
+    virtual ~Layer() {}
 
     inline virtual void forward (const T* input, T* out) = 0;
 

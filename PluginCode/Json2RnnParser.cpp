@@ -1,4 +1,5 @@
 #include "Json2RnnParser.h"
+#include "MLUtils/activation.h"
 
 Model<float>* Json2RnnParser::parseJson (InputStream& input)
 {
@@ -28,6 +29,12 @@ Model<float>* Json2RnnParser::parseJson (InputStream& input)
         {
             auto dense = createDense (model->getNextInSize(), layerDims, weights);
             model->addLayer (dense.release());
+
+            if (type == "time-distributed-dense")
+            {
+                auto activation = std::make_unique<TanhActivation<float>> (layerDims);
+                model->addLayer (activation.release());
+            }
         }
         else if (type == "gru")
         {

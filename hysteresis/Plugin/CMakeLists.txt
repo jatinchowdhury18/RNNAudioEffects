@@ -41,12 +41,12 @@ jucer_audio_plugin_settings(
 
 add_subdirectory(../../PluginCode shared_build)
 
-jucer_project_files("shared"
+jucer_project_files("Source"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
   .         .         .         "${CMAKE_CURRENT_LIST_DIR}/RNNHysteresisPlugin.h"
   x         .         .         "${CMAKE_CURRENT_LIST_DIR}/RNNHysteresisPlugin.cpp"
-  .         .         x         "${CMAKE_CURRENT_LIST_DIR}/../models/hysteresis_fs.json"
+  .         .         x         "${CMAKE_CURRENT_LIST_DIR}/../models/hysteresis_full.json"
 )
 
 # JUCE modules

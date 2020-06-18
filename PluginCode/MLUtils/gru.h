@@ -5,6 +5,10 @@
 #include <numeric>
 #include <cmath>
 #include <cstring>
+
+#ifdef USE_EIGEN
+#include "gru_eigen.h"
+#else
 #include "Layer.h"
 
 template<typename T>
@@ -23,7 +27,7 @@ public:
         cVec = new T[out_size];
     }
 
-    ~GRULayer()
+    virtual ~GRULayer()
     {
         delete[] ht1;
         delete[] zVec;
@@ -143,9 +147,10 @@ private:
     WeightSet rWeights;
     WeightSet cWeights;
 
-    T* zVec; // [out_size];
-    T* rVec; // [out_size];
-    T* cVec; // [out_size];
+    T* zVec;
+    T* rVec;
+    T* cVec;
 };
+#endif
 
 #endif // GRU_H_INCLUDED
