@@ -81,9 +81,14 @@ class Model():
 
             epoch += 1
 
-    def train(self, num_epochs, in_train, out_train, in_val=None, out_val=None, N_skip=1000, N_block=2048):
+    def train(self, num_epochs, in_train, out_train, in_val=None, out_val=None, N_skip=1000, N_block=2048, save_model=None, save_hist=None):
         for epoch in range(num_epochs):
             self.run_epoch(epoch, in_train, out_train, in_val, out_val, N_skip, N_block)
+
+            if save_model is not None:
+                self.save_model(save_model)
+            if save_hist is not None:
+                self.save_history(save_hist)
         
         print("DONE!")
 
