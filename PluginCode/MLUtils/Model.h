@@ -1,8 +1,13 @@
 #ifndef MODEL_H_INCLUDED
 #define MODEL_H_INCLUDED
 
-#include "Layer.h"
 #include <vector>
+
+#include "Layer.h"
+#include "activation.h"
+#include "dense.h"
+#include "gru.h"
+#include "gru.cpp"
 
 template<typename T>
 class Model

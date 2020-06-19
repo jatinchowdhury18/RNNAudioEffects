@@ -1,5 +1,4 @@
 #include "Json2RnnParser.h"
-#include "MLUtils/activation.h"
 
 Model<float>* Json2RnnParser::parseJson (InputStream& input)
 {

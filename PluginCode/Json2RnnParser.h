@@ -3,8 +3,6 @@
 
 #include "JuceHeader.h"
 #include "MLUtils/Model.h"
-#include "MLUtils/dense.h"
-#include "MLUtils/gru.h"
 
 class Json2RnnParser
 {

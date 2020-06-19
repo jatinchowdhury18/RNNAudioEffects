@@ -8,31 +8,8 @@ template<typename T>
 class GRULayer : public Layer<T>
 {
 public:
-    GRULayer (size_t in_size, size_t out_size) :
-        Layer<T> (in_size, out_size)
-    {
-        wVec_z.resize (out_size, in_size);
-        wVec_r.resize (out_size, in_size);
-        wVec_c.resize (out_size, in_size);
-        uVec_z.resize (out_size, out_size);
-        uVec_r.resize (out_size, out_size);
-        uVec_c.resize (out_size, out_size);
-        bVec_z.resize (out_size, 2);
-        bVec_r.resize (out_size, 2);
-        bVec_c.resize (out_size, 2);
-
-        ht1.resize (out_size, 1);
-        zVec.resize (out_size, 1);
-        rVec.resize (out_size, 1);
-        cVec.resize (out_size, 1);
-
-        inVec.resize (in_size, 1);
-        ones = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Ones (out_size, 1);
-    }
-
-    virtual ~GRULayer()
-    {
-    }
+    GRULayer (size_t in_size, size_t out_size);
+    virtual ~GRULayer() {}
 
     void reset()
     {
@@ -60,44 +37,9 @@ public:
         vector = (T) 1 / (((T) -1 * vector.array()).array().exp() + (T) 1);
     }
 
-    void setWVals(T** wVals)
-    {
-        for(int i = 0; i < in_size; ++i)
-        {
-            for(int k = 0; k < out_size; ++k)
-            {
-                wVec_z (k, i) = wVals[i][k];
-                wVec_r (k, i) = wVals[i][k+out_size];
-                wVec_c (k, i) = wVals[i][k+out_size*2];
-            }
-        }
-    }
-
-    void setUVals(T** uVals)
-    {
-        for(int i = 0; i < out_size; ++i)
-        {
-            for(int k = 0; k < out_size; ++k)
-            {
-                uVec_z (k, i) = uVals[i][k];
-                uVec_r (k, i) = uVals[i][k+out_size];
-                uVec_c (k, i) = uVals[i][k+out_size*2];
-            }
-        }
-    }
-
-    void setBVals(T** bVals)
-    {
-        for(int i = 0; i < 2; ++i)
-        {
-            for(int k = 0; k < out_size; ++k)
-            {
-                bVec_z (k, i) = bVals[i][k];
-                bVec_r (k, i) = bVals[i][k+out_size];
-                bVec_c (k, i) = bVals[i][k+out_size*2];
-            }
-        }
-    }
+    void setWVals(T** wVals);
+    void setUVals(T** uVals);
+    void setBVals(T** bVals);
 
 private:
     Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> wVec_z;
