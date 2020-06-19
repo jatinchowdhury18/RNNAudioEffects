@@ -13,12 +13,12 @@ public:
 
     void reset()
     {
-        std::fill(ht1.data(), ht1.data() + out_size, (T) 0);
+        std::fill(ht1.data(), ht1.data() + Layer<T>::out_size, (T) 0);
     }
 
     inline void forward(const T* input, T* h) override
     {
-        inVec = Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>> (input, in_size, 1);
+        inVec = Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>> (input, Layer<T>::in_size, 1);
 
         zVec = wVec_z * inVec + uVec_z * ht1 + bVec_z.col (0) + bVec_z.col (1);
         rVec = wVec_r * inVec + uVec_r * ht1 + bVec_r.col (0) + bVec_r.col (1);
@@ -29,7 +29,7 @@ public:
         cVec = cVec.array().tanh();
         
         ht1 = (ones - zVec).cwiseProduct (cVec) + zVec.cwiseProduct (ht1);
-        std::copy (ht1.data(), ht1.data() + out_size, h);
+        std::copy (ht1.data(), ht1.data() + Layer<T>::out_size, h);
     }
 
     inline void sigmoid (Eigen::Matrix<T, Eigen::Dynamic, 1>& vector)

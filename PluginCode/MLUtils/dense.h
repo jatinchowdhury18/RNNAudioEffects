@@ -31,7 +31,7 @@ public:
 
     void setWeights(const T* newWeights)
     {
-        for(size_t i = 0; i < in_size; ++i)
+        for (size_t i = 0; i < in_size; ++i)
             weights[i] = newWeights[i];
     }
 
@@ -58,7 +58,7 @@ public:
 
     virtual ~Dense()
     {
-        for (size_t i = 0; i < out_size; ++i)
+        for (size_t i = 0; i < Layer<T>::out_size; ++i)
             delete subLayers[i];
 
         delete[] subLayers;
@@ -66,7 +66,7 @@ public:
 
     inline void forward (const T* input, T* out) override
     {
-        for (size_t i = 0; i < out_size; ++i)
+        for (size_t i = 0; i < Layer<T>::out_size; ++i)
         {
             out[i] = subLayers[i]->forward (input);
         }
@@ -74,13 +74,13 @@ public:
 
     void setWeights(T** newWeights)
     {
-        for(size_t i = 0; i < out_size; ++i)
+        for (size_t i = 0; i < Layer<T>::out_size; ++i)
             subLayers[i]->setWeights (newWeights[i]);
     }
 
     void setBias(T* b)
     {
-        for(size_t i = 0; i < out_size; ++i)
+        for (size_t i = 0; i < Layer<T>::out_size; ++i)
             subLayers[i]->setBias (b[i]);
     }
 

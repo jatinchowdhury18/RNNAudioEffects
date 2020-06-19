@@ -16,7 +16,7 @@ public:
 
     inline void forward (const T* input, T* out) override
     {
-        for (size_t i = 0; i < out_size; ++i)
+        for (size_t i = 0; i < Layer<T>::out_size; ++i)
         {
             out[i] = func (input[i]);
         }
@@ -40,8 +40,8 @@ public:
 
     inline void forward (const T* input, T* out) override
     {
-        std::copy (input, &input[in_size], out);
-        vector = Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> (out, in_size, 1);
+        std::copy (input, &input[Layer<T>::in_size], out);
+        vector = Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> (out, Layer<T>::in_size, 1);
         vector = vector.array().tanh();
     }
 

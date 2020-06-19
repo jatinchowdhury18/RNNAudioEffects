@@ -22,22 +22,22 @@ public:
 
     inline void forward (const T* input, T* out) override
     {
-        inVec = Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>> (input, in_size, 1);
+        inVec = Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>> (input, Layer<T>::in_size, 1);
         outVec = weights * inVec + bias;
 
-        std::copy (outVec.data(), outVec.data() + out_size, out);
+        std::copy (outVec.data(), outVec.data() + Layer<T>::out_size, out);
     }
 
     void setWeights(T** newWeights)
     {
-        for (size_t i = 0; i < out_size; ++i)
-            for (size_t k = 0; k < in_size; ++k)
+        for (size_t i = 0; i < Layer<T>::out_size; ++i)
+            for (size_t k = 0; k < Layer<T>::in_size; ++k)
                 weights (i, k) = newWeights[i][k];
     }
 
     void setBias(T* b)
     {
-        for (size_t i = 0; i < out_size; ++i)
+        for (size_t i = 0; i < Layer<T>::out_size; ++i)
             bias (i, 0) = b[i];
     }
 

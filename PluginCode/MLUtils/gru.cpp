@@ -45,7 +45,7 @@ GRULayer<T>::WeightSet::~WeightSet()
     delete[] b[0];
     delete[] b[1];
 
-    for (size_t i = 0; i < out_size; ++i)
+    for (size_t i = 0; i < Layer<T>::out_size; ++i)
     {
         delete[] W[i];
         delete[] U[i];
@@ -58,13 +58,13 @@ GRULayer<T>::WeightSet::~WeightSet()
 template<typename T>
 void GRULayer<T>::setWVals(T** wVals)
 {
-    for (size_t i = 0; i < in_size; ++i)
+    for (size_t i = 0; i < Layer<T>::in_size; ++i)
     {
-        for (size_t k = 0; k < out_size; ++k)
+        for (size_t k = 0; k < Layer<T>::out_size; ++k)
         {
             zWeights.W[k][i] = wVals[i][k];
-            rWeights.W[k][i] = wVals[i][k+out_size];
-            cWeights.W[k][i] = wVals[i][k+out_size*2];
+            rWeights.W[k][i] = wVals[i][k+Layer<T>::out_size];
+            cWeights.W[k][i] = wVals[i][k+Layer<T>::out_size*2];
         }
     }
 }
@@ -72,13 +72,13 @@ void GRULayer<T>::setWVals(T** wVals)
 template<typename T>
 void GRULayer<T>::setUVals(T** uVals)
 {
-    for (size_t i = 0; i < out_size; ++i)
+    for (size_t i = 0; i < Layer<T>::out_size; ++i)
     {
-        for (size_t k = 0; k < out_size; ++k)
+        for (size_t k = 0; k < Layer<T>::out_size; ++k)
         {
             zWeights.U[k][i] = uVals[i][k];
-            rWeights.U[k][i] = uVals[i][k+out_size];
-            cWeights.U[k][i] = uVals[i][k+out_size*2];
+            rWeights.U[k][i] = uVals[i][k+Layer<T>::out_size];
+            cWeights.U[k][i] = uVals[i][k+Layer<T>::out_size*2];
         }
     }
 }
@@ -88,11 +88,11 @@ void GRULayer<T>::setBVals(T** bVals)
 {
     for (size_t i = 0; i < 2; ++i)
     {
-        for (size_t k = 0; k < out_size; ++k)
+        for (size_t k = 0; k < Layer<T>::out_size; ++k)
         {
             zWeights.b[i][k] = bVals[i][k];
-            rWeights.b[i][k] = bVals[i][k+out_size];
-            cWeights.b[i][k] = bVals[i][k+out_size*2];
+            rWeights.b[i][k] = bVals[i][k+Layer<T>::out_size];
+            cWeights.b[i][k] = bVals[i][k+Layer<T>::out_size*2];
         }
     }
 }
