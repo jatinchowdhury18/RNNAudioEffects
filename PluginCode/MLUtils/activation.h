@@ -16,7 +16,7 @@ public:
 
     inline void forward (const T* input, T* out) override
     {
-        for (int i = 0; i < out_size; ++i)
+        for (size_t i = 0; i < out_size; ++i)
         {
             out[i] = func (input[i]);
         }

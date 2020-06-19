@@ -6,6 +6,9 @@ project("RNNHysteresis")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../modules/FRUT/prefix/FRUT/cmake")
 include(Reprojucer)
 
+# comment to use STL implementation instead of Eigen
+add_definitions(-DUSE_EIGEN)
+
 jucer_project_begin(
     JUCER_VERSION "5.4.7"
     PROJECT_FILE "${RNNHysteresis_jucer_FILE}"

@@ -1,8 +1,6 @@
 #ifndef LAYER_H_INCLUDED
 #define LAYER_H_INCLUDED
 
-#define USE_EIGEN
-
 template<typename T>
 class Layer
 {

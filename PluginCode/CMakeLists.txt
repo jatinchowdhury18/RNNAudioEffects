@@ -28,8 +28,8 @@ jucer_project_files("shared"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
   .         .         .         "${CMAKE_CURRENT_LIST_DIR}/PluginBase.h"
-  .         .         .         "${CMAKE_CURRENT_LIST_DIR}/Json2RNNParser.h"
-  x         .         .         "${CMAKE_CURRENT_LIST_DIR}/Json2RNNParser.cpp"
+  .         .         .         "${CMAKE_CURRENT_LIST_DIR}/Json2RnnParser.h"
+  x         .         .         "${CMAKE_CURRENT_LIST_DIR}/Json2RnnParser.cpp"
 )
 
 # JUCE modules

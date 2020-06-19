@@ -30,14 +30,14 @@ public:
 
     void setWeights(T** newWeights)
     {
-        for (int i = 0; i < out_size; ++i)
-            for (int k = 0; k < in_size; ++k)
+        for (size_t i = 0; i < out_size; ++i)
+            for (size_t k = 0; k < in_size; ++k)
                 weights (i, k) = newWeights[i][k];
     }
 
     void setBias(T* b)
     {
-        for(int i = 0; i < out_size; ++i)
+        for (size_t i = 0; i < out_size; ++i)
             bias (i, 0) = b[i];
     }
 

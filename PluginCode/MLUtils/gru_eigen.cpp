@@ -27,9 +27,9 @@ GRULayer<T>::GRULayer (size_t in_size, size_t out_size) :
 template<typename T>
 void GRULayer<T>::setWVals(T** wVals)
 {
-    for(int i = 0; i < in_size; ++i)
+    for (size_t i = 0; i < in_size; ++i)
     {
-        for(int k = 0; k < out_size; ++k)
+        for (size_t k = 0; k < out_size; ++k)
         {
             wVec_z (k, i) = wVals[i][k];
             wVec_r (k, i) = wVals[i][k+out_size];
@@ -41,9 +41,9 @@ void GRULayer<T>::setWVals(T** wVals)
 template<typename T>
 void GRULayer<T>::setUVals(T** uVals)
 {
-    for(int i = 0; i < out_size; ++i)
+    for (size_t i = 0; i < out_size; ++i)
     {
-        for(int k = 0; k < out_size; ++k)
+        for (size_t k = 0; k < out_size; ++k)
         {
             uVec_z (k, i) = uVals[i][k];
             uVec_r (k, i) = uVals[i][k+out_size];
@@ -55,9 +55,9 @@ void GRULayer<T>::setUVals(T** uVals)
 template<typename T>
 void GRULayer<T>::setBVals(T** bVals)
 {
-    for(int i = 0; i < 2; ++i)
+    for (size_t i = 0; i < 2; ++i)
     {
-        for(int k = 0; k < out_size; ++k)
+        for (size_t k = 0; k < out_size; ++k)
         {
             bVec_z (k, i) = bVals[i][k];
             bVec_r (k, i) = bVals[i][k+out_size];

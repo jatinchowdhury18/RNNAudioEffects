@@ -58,9 +58,9 @@ GRULayer<T>::WeightSet::~WeightSet()
 template<typename T>
 void GRULayer<T>::setWVals(T** wVals)
 {
-    for(int i = 0; i < in_size; ++i)
+    for (size_t i = 0; i < in_size; ++i)
     {
-        for(int k = 0; k < out_size; ++k)
+        for (size_t k = 0; k < out_size; ++k)
         {
             zWeights.W[k][i] = wVals[i][k];
             rWeights.W[k][i] = wVals[i][k+out_size];
@@ -72,9 +72,9 @@ void GRULayer<T>::setWVals(T** wVals)
 template<typename T>
 void GRULayer<T>::setUVals(T** uVals)
 {
-    for(int i = 0; i < out_size; ++i)
+    for (size_t i = 0; i < out_size; ++i)
     {
-        for(int k = 0; k < out_size; ++k)
+        for (size_t k = 0; k < out_size; ++k)
         {
             zWeights.U[k][i] = uVals[i][k];
             rWeights.U[k][i] = uVals[i][k+out_size];
@@ -86,9 +86,9 @@ void GRULayer<T>::setUVals(T** uVals)
 template<typename T>
 void GRULayer<T>::setBVals(T** bVals)
 {
-    for(int i = 0; i < 2; ++i)
+    for (size_t i = 0; i < 2; ++i)
     {
-        for(int k = 0; k < out_size; ++k)
+        for (size_t k = 0; k < out_size; ++k)
         {
             zWeights.b[i][k] = bVals[i][k];
             rWeights.b[i][k] = bVals[i][k+out_size];

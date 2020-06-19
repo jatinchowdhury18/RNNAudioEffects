@@ -1,7 +1,7 @@
 #ifndef GRUEIGEN_H_INCLUDED
 #define GRUEIGEN_H_INCLUDED
 
-#include <Eigen/Eigen>
+#include "../../modules/Eigen/Eigen"
 #include "Layer.h"
 
 template<typename T>
