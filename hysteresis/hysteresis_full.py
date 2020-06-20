@@ -23,22 +23,28 @@ import utils.losses as losses
 filepath = '../Data/fma_small/'
 files = os.listdir(filepath)
 
-NUM_FILES = 600
+NUM_FILES = 1600
 NUM_SAMPLES = 16000
+QUIET_THRESH = NUM_SAMPLES / 100
 clean_data = []
 fs_data = []
 for i in tqdm(range(NUM_FILES)):
-    fs = np.random.uniform(96000, 192000)
+    fs = np.random.uniform(88000, 192000)
     x = load_fma_file(files, filepath, fs, NUM_SAMPLES)
 
+    # skip if too quiet
+    if np.sum(np.abs(x)) < QUIET_THRESH:
+        i -= 1
+        continue
+
     fs_data.append(np.ones_like(x) * (1.0 / fs))
-    clean_data.append(x)
+    clean_data.append(adsp.normalize(x))
 
 clean_data = np.asarray(clean_data)
 
 # %%
 # look at file
-idx = 10
+idx = 8
 plt.plot(clean_data[idx])
 
 # %%
@@ -51,7 +57,7 @@ for i, x in tqdm(enumerate(clean_data)):
     drive = np.random.uniform()
     sat = np.random.uniform()
     width = np.random.uniform()
-    hyst = adsp.Hysteresis(drive, sat, width, fs, mode='RK4')
+    hyst = adsp.Hysteresis(drive, sat, width, fs, dAlpha=0.95, mode='RK4')
     y = hyst.process_block(x)
 
     drive_data.append(np.ones_like(x) * drive)
@@ -72,8 +78,8 @@ plt.semilogx(freqs, x_fft)
 plt.semilogx(freqs, y_fft)
 
 # %%
-NUM_TRAIN = 575
-NUM_VAL = 25
+NUM_TRAIN = 1550
+NUM_VAL = 24
 x_data = np.stack((clean_data, drive_data, sat_data, width_data, fs_data), axis=1)
 
 x_train, x_val = np.split(x_data, [NUM_TRAIN])
@@ -91,6 +97,20 @@ plt.plot(IN_train[0, :, 1])
 
 print(IN_train.dtype)
 print(OUT_train.dtype)
+
+# %%
+np.save("data/out_train.npy", OUT_train)
+np.save("data/out_val.npy", OUT_val)
+np.save("data/in_train.npy", IN_train)
+np.save("data/in_val.npy", IN_val)
+
+# %%
+OUT_train = np.load("data/out_train.npy")
+OUT_val   = np.load("data/out_val.npy")
+IN_train  = np.load("data/in_train.npy")
+IN_val    = np.load("data/in_val.npy")
+
+NUM_SAMPLES = 16000
 
 # %%
 model_file = 'models/hysteresis_full.json'
@@ -126,27 +146,28 @@ model.plot_error()
 
 # %%
 # Test prediction
-idx = 24
+idx = 44
 predictions = model.model.predict(IN_train[idx].reshape(1, NUM_SAMPLES, 5)).flatten()
 
 # Plot the predictions along with the test data
 plt.clf()
 plt.title('Training data predicted vs actual values')
-plt.plot(hyst_data[idx], 'c', label='Actual')
+plt.plot(OUT_train[idx], 'c', label='Actual')
 plt.plot(predictions, 'r--', label='Predicted')
 plt.legend()
 plt.xlim(0, 3000)
 plt.xlabel('Time [samples]')
 
 # %%
-freqs, pred_fft = plot_fft(predictions, 1.0 / fs_data[idx][0])
-freqs, target_fft = plot_fft(hyst_data[idx], 1.0 / fs_data[idx][0])
+fs = 1.0 / IN_train[idx,0,-1]
+freqs, pred_fft = plot_fft(predictions, fs)
+freqs, target_fft = plot_fft(OUT_train[idx], fs)
 
 # Plot the predictions along with to the test data
 plt.clf()
 plt.title('Training data predicted vs actual values')
-plt.semilogx(freqs, target_fft, 'b', label='Actual')
-plt.semilogx(freqs, pred_fft, 'r--', label='Predicted')
+plt.semilogx(target_fft, 'b', label='Actual')
+plt.semilogx(pred_fft, 'r--', label='Predicted')
 plt.legend()
 plt.xlim(50, 20000)
 plt.ylim(-5)
@@ -155,7 +176,7 @@ plt.ylabel('Magnitude [dB]')
 
 # %%
 start = 5500
-end = 6000
+end = 7000
 plt.plot(clean_data[idx][start:end], hyst_data[idx][start:end])
 plt.plot(clean_data[idx][start:end], predictions[start:end], '--')
 

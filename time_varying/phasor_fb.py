@@ -24,15 +24,20 @@ from utils.phaser import Phasor
 filepath = '../Data/fma_small/'
 files = os.listdir(filepath)
 
-NUM_FILES = 500
+NUM_FILES = 200
 NUM_SAMPLES = 15000
-FS = 48000
+# FS = 48000
 clean_data = []
+fs_data = []
 for i in tqdm(range(NUM_FILES)):
-    x = load_fma_file(files, filepath, FS, NUM_SAMPLES)
+    fs = 48000 # np.random.uniform(32000, 96000)
+    x = load_fma_file(files, filepath, fs, NUM_SAMPLES)
+
     clean_data.append(x)
+    fs_data.append(np.ones_like(x) * (1.0 / fs))
 
 clean_data = np.asarray(clean_data)
+fs_data = np.asarray(fs_data)
 
 # %%
 # look at file
@@ -42,15 +47,20 @@ plt.plot(clean_data[idx])
 # %%
 phase_data = []
 lfo_data = []
+fb_data = []
 for i, x in tqdm(enumerate(clean_data)):
+    fs = 1.0 / fs_data[i][0]
+    fb = np.random.uniform()
+
     freq = np.random.uniform(0.0, 20)
     depth = np.random.uniform()
-    lfo = depth * np.sin(2 * np.pi * freq * np.arange(len(x)) / FS)
+    lfo = depth * np.sin(2 * np.pi * freq * np.arange(len(x)) / fs)
 
-    phasor = Phasor(FS)
-    y = phasor.process_block(x, lfo, 0.5)
+    phasor = Phasor(fs)
+    y = phasor.process_block(x, lfo, fb)
 
     lfo_data.append(lfo.astype(np.float32))
+    fb_data.append(np.ones_like(x) * fb)
     phase_data.append(y.astype(np.float32))
 
 # %%
@@ -59,11 +69,14 @@ plt.figure()
 plt.plot(clean_data[idx])
 plt.plot(phase_data[idx])
 plt.plot(lfo_data[idx])
+plt.plot(fb_data[idx])
+
+print(1.0 / fs_data[idx][0])
 
 # %%
-NUM_TRAIN = 475
-NUM_VAL = 25
-x_data = np.stack((clean_data, lfo_data), axis=1)
+NUM_TRAIN = 190
+NUM_VAL = 10
+x_data = np.stack((clean_data, lfo_data, fb_data), axis=1)
 
 x_train, x_val = np.split(x_data, [NUM_TRAIN])
 y_train, y_val  = np.split(phase_data, [NUM_TRAIN])
@@ -71,8 +84,8 @@ y_train, y_val  = np.split(phase_data, [NUM_TRAIN])
 # %%
 OUT_train  = np.reshape(y_train, (NUM_TRAIN, NUM_SAMPLES, 1))
 OUT_val    = np.reshape(y_val, (NUM_VAL, NUM_SAMPLES, 1))
-IN_train = np.reshape(x_train.transpose((0, 2, 1)), (NUM_TRAIN, NUM_SAMPLES, 2))
-IN_val   = np.reshape(x_val.transpose((0, 2, 1)), (NUM_VAL, NUM_SAMPLES, 2))
+IN_train = np.reshape(x_train.transpose((0, 2, 1)), (NUM_TRAIN, NUM_SAMPLES, 3))
+IN_val   = np.reshape(x_val.transpose((0, 2, 1)), (NUM_VAL, NUM_SAMPLES, 3))
 
 # %%
 plt.plot(IN_train[0, :, 0])
@@ -87,12 +100,13 @@ def model_loss(target_y, predicted_y):
 
 # construct model
 model = Model(model_loss, optimizer=keras.optimizers.Adam(learning_rate=5.0e-4))
-# model.model.add(keras.layers.InputLayer(input_shape=(None, 2)))
-# model.model.add(keras.layers.TimeDistributed(keras.layers.Dense(8, activation='tanh')))
-# model.model.add(keras.layers.GRU(units=16, return_sequences=True))
-# model.model.add(keras.layers.Dense(1))
-model.load_model('models/phasor_fb.json')
-model.load_history('models/phasor_fb_history.txt')
+model.model.add(keras.layers.InputLayer(input_shape=(None, 3)))
+model.model.add(keras.layers.TimeDistributed(keras.layers.Dense(16, activation='tanh')))
+model.model.add(keras.layers.GRU(units=32, return_sequences=True))
+model.model.add(keras.layers.GRU(units=32, return_sequences=True))
+model.model.add(keras.layers.Dense(1))
+# model.load_model('models/phasor_fb.json')
+# model.load_history('models/phasor_fb_history.txt')
 
 model.model.summary()
 
