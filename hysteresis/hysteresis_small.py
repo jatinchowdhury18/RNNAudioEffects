@@ -113,8 +113,8 @@ IN_val    = np.load("data/in_val.npy")
 NUM_SAMPLES = 16000
 
 # %%
-model_file = 'models/hysteresis_full.json'
-model_hist = 'models/hysteresis_full_history.txt'
+model_file = 'models/hysteresis_small.json'
+model_hist = 'models/hysteresis_small_history.txt'
 
 # %%
 def model_loss(target_y, predicted_y):
@@ -124,7 +124,7 @@ def model_loss(target_y, predicted_y):
 model = Model(model_loss, optimizer=keras.optimizers.Adam(learning_rate=5.0e-4))
 # model.model.add(keras.layers.InputLayer(input_shape=(None, 5)))
 # model.model.add(keras.layers.TimeDistributed(keras.layers.Dense(8, activation='tanh')))
-# model.model.add(keras.layers.GRU(units=16, return_sequences=True))
+# model.model.add(keras.layers.GRU(units=8, return_sequences=True))
 # model.model.add(keras.layers.Dense(1))
 model.load_model(model_file)
 model.load_history(model_hist)
@@ -132,7 +132,7 @@ model.load_history(model_hist)
 model.model.summary()
 
 # %%
-model.train(79, IN_train, OUT_train, IN_val, OUT_val, save_model=model_file, save_hist=model_hist)
+model.train(43, IN_train, OUT_train, IN_val, OUT_val, save_model=model_file, save_hist=model_hist)
 # model.train_until(0.01, IN_train, OUT_train, IN_val, OUT_val)
 
 # %%
@@ -148,7 +148,7 @@ print(len(model.train_loss))
 
 # %%
 # Test prediction
-idx = 45
+idx = 44
 predictions = model.model.predict(IN_train[idx].reshape(1, NUM_SAMPLES, 5)).flatten()
 
 # Plot the predictions along with the test data
@@ -157,7 +157,7 @@ plt.title('Training data predicted vs actual values')
 plt.plot(OUT_train[idx], 'c', label='Actual')
 plt.plot(predictions, 'r--', label='Predicted')
 plt.legend()
-plt.xlim(0, 6000)
+plt.xlim(0, 3000)
 plt.xlabel('Time [samples]')
 
 # %%
@@ -175,9 +175,6 @@ plt.xlim(50, 20000)
 plt.ylim(-5)
 plt.xlabel('Frequency [Hz]')
 plt.ylabel('Magnitude [dB]')
-
-# %%
-print(losses.esr_loss(OUT_train, model.model.predict(IN_train)))
 
 # %%
 start = 5500

@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.signal as signal
 
-class Phasor:
+class PhasorMod:
     def __init__(self, fs, Nstages=10):
         self.fs = fs
         self.z = np.zeros((Nstages,2))
@@ -29,8 +29,6 @@ class Phasor:
             b, a = self.calc_coefs(r_val)
 
             for stage in range(Nstages):
-                x[n] = self.process_stage(x[n], b, a, stage)
-
-            y[n] = x[n]
+                y[n] = self.process_stage(y[n], b, a, stage)
 
         return y
