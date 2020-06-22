@@ -132,14 +132,14 @@ model.load_history(model_hist)
 model.model.summary()
 
 # %%
-model.train(43, IN_train, OUT_train, IN_val, OUT_val, save_model=model_file, save_hist=model_hist)
+model.train(144, IN_train, OUT_train, IN_val, OUT_val, save_model=model_file, save_hist=model_hist)
 # model.train_until(0.01, IN_train, OUT_train, IN_val, OUT_val)
 
 # %%
 # plot metrics
 plt.figure()
 model.plot_loss()
-plt.ylim(0, 0.1)
+plt.ylim(0, 0.05)
 
 plt.figure()
 model.plot_error()
@@ -181,6 +181,9 @@ start = 5500
 end = 7000
 plt.plot(clean_data[idx][start:end], hyst_data[idx][start:end])
 plt.plot(clean_data[idx][start:end], predictions[start:end], '--')
+
+# %%
+print(losses.esr_loss(OUT_train, model.model.predict(IN_train)))
 
 # %%
 model.save_model(model_file)
