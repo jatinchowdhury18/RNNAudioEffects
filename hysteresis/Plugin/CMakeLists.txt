@@ -50,6 +50,7 @@ jucer_project_files("Source"
   .         .         .         "${CMAKE_CURRENT_LIST_DIR}/RNNHysteresisPlugin.h"
   x         .         .         "${CMAKE_CURRENT_LIST_DIR}/RNNHysteresisPlugin.cpp"
   .         .         x         "${CMAKE_CURRENT_LIST_DIR}/../models/hysteresis_full.json"
+  .         .         x         "${CMAKE_CURRENT_LIST_DIR}/../models/hysteresis_small.json"
 )
 
 # JUCE modules

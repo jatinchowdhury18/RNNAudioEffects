@@ -28,6 +28,7 @@ jucer_project_files("shared"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
   .         .         .         "${CMAKE_CURRENT_LIST_DIR}/PluginBase.h"
+  .         .         .         "${CMAKE_CURRENT_LIST_DIR}/DCBlocker.h"
   .         .         .         "${CMAKE_CURRENT_LIST_DIR}/Json2RnnParser.h"
   x         .         .         "${CMAKE_CURRENT_LIST_DIR}/Json2RnnParser.cpp"
 )
