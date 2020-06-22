@@ -1,39 +1,44 @@
 # RNN Experiments
 
-Experimental audio effects made with recurrent neural networks.
+[![Build Status](https://travis-ci.com/jatinchowdhury18/RNNAudioEffects.svg?token=Ub9niJrqG1Br1qaaxp7E&branch=master)](https://travis-ci.com/jatinchowdhury18/RNNAudioEffects)
 
-Goals:
-- [ ] Hysteresis with 3 parameters
-- [ ] Hysteresis with arbitrary sample rate (look at aliasing)
-- [ ] Figure out how to adjust weights for any sample rate
-- [ ] Time-varying effect (phaser?)
-- [ ] Reverse Distortion (with params??)
-- [ ] Restoration (high freq. loss, deadzone)
+This repository contains code for training and implementing real-time
+audio effects using single-sample recurrent neural networks. 
+
+**Effects:**
+- [x] Hysteresis
+- [ ] Phaser
+- [ ] Reverse Distortion
+- [ ] Restoration
 
 ---
 
-## Hysteresis (params)
+## TODO
 
-- Train full model with sample rate
-- Train full model with 3-params
-- Train model with sample rate and 3-params
-- Implement C++ hysteresi model plugin
+### Hysteresis
 
-## Reverse Distortion
+- Train improved model
 
-- Working pretty well for single distortion curve
-- Better results for blind mix of curves
-- Try stateful distortion (WDF diode clipper)
-- Compare two models: (Recurrent -> Dense)  vs (Time-Dist Dense -> Recurrent -> Dense)
+### Time-Varying
 
-## Restoration
+- Train phaser with param and variable sample rate
+- Implement plugin
+- Maybe do mod section?
 
-- Poor results...
-  - Try different net architectures
-  - Try single degradation method at a time
+### Reverse Distortion
 
-## Time-varying
+- Try distortion w/ no gain, or w/ gain applied to dry and wet
+- Try with stateful distortion (diode clipper?)
+- Add a parameter?
+- Implement plugin
 
-- success with vibrato
-- Try with phaser mod section
-- Try with phaser FB section
+### Restoration
+
+- TODO: everything
+
+
+---
+
+## License
+
+BSD??
